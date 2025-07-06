@@ -13,6 +13,8 @@ class ViewController: UIViewController {
     var notePreview = UILabel()
     var addNoteButton = UIButton()
     
+    let defaults = UserDefaults.standard
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         title = "Note App"
@@ -31,7 +33,7 @@ class ViewController: UIViewController {
     }
     
     func addNotePreviewLabelToStackView() {
-        notePreview.text = "What is on your mind?"
+        loadNotePreviewFromUserDefaults()
         notePreview.numberOfLines = 0
         notePreview.adjustsFontSizeToFitWidth = true
         notePreview.textAlignment = .center
@@ -59,6 +61,21 @@ class ViewController: UIViewController {
         stackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16).isActive = true
         stackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16).isActive = true
         stackView.spacing = 16
+    }
+    
+    // will delete later
+    func setDummyNoteIfFirstLaunch() {
+        let hasLaunchedBefore = defaults.bool(forKey: "hasLaunchedBefore")
+        if !hasLaunchedBefore {
+            let dummyNote = Note(content: "What's on your mind?")
+            defaults.set(dummyNote, forKey: "userNote")
+            defaults.set(true, forKey: "hasLaunchedBefore")
+        }
+    }
+    
+    func loadNotePreviewFromUserDefaults() {
+        let note = defaults.string(forKey: "userNote") ?? "What's on your mind?"
+        notePreview.text = note
     }
 }
 
