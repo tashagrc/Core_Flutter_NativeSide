@@ -8,12 +8,17 @@
 import UIKit
 import Flutter
 
+protocol NoteReceiverDelegate: AnyObject {
+    func didReceiveNote(_ note: String)
+}
+
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate, FlutterAppLifeCycleProvider {
     
     private let lifecycleDelegate = FlutterPluginAppLifeCycleDelegate()
-    
+    private let channelName = "natasharadika.flutter.dev/note"
     let flutterEngine = FlutterEngine(name: "my flutter engine")
+    weak var delegate: NoteReceiverDelegate?
     
     func add(_ delegate: any FlutterApplicationLifeCycleDelegate) {
         lifecycleDelegate.add(delegate)
@@ -21,6 +26,22 @@ class AppDelegate: UIResponder, UIApplicationDelegate, FlutterAppLifeCycleProvid
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         flutterEngine.run()
+        let channel = FlutterMethodChannel(name: channelName, binaryMessenger: flutterEngine.binaryMessenger)
+        
+        // act on flutter who call method on ios
+        channel.setMethodCallHandler { call, result in
+            if call.method == "saveNote" {
+                if let args = call.arguments as? [String: Any], let note = args["note"] as? String {
+                    DispatchQueue.main.async {
+                        self.delegate?.didReceiveNote(note)
+                    }
+                    result("note received")
+                }
+            } else {
+                result(FlutterMethodNotImplemented)
+            }
+        }
+        
         return lifecycleDelegate.application(application, didFinishLaunchingWithOptions: launchOptions ?? [:])
     }
     

@@ -8,7 +8,7 @@
 import UIKit
 import Flutter
 
-class ViewController: UIViewController {
+class ViewController: UIViewController, NoteReceiverDelegate {
 
     var stackView = UIStackView()
     var notePreview = UILabel()
@@ -79,6 +79,14 @@ class ViewController: UIViewController {
     func loadNotePreviewFromUserDefaults() {
         let note = defaults.string(forKey: "userNote") ?? "What's on your mind?"
         notePreview.text = note
+    }
+    
+    func didReceiveNote(_ note: String) {
+        DispatchQueue.main.async {
+            self.notePreview.text = note
+            self.defaults.set(note, forKey: "userNote")
+            self.defaults.set(true, forKey: "hasLaunchedBefore")
+        }
     }
 }
 
