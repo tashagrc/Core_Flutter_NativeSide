@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Flutter
 
 class ViewController: UIViewController {
 
@@ -52,7 +53,9 @@ class ViewController: UIViewController {
     }
     
     @objc func buttonTapped() {
-        print("button was tapped")
+        let flutterEngine = (UIApplication.shared.delegate as! AppDelegate).flutterEngine
+        let flutterViewController = FlutterViewController(engine: flutterEngine, nibName: nil, bundle: nil)
+        present(flutterViewController, animated: true, completion: nil)
     }
     
     func setStackViewConstraints() {
