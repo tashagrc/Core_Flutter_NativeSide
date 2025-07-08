@@ -10,53 +10,61 @@ import Flutter
 
 class ViewController: UIViewController, NoteReceiverDelegate {
 
-    var stackView = UIStackView()
-    var notePreview = UILabel()
-    var addNoteButton = UIButton()
+    private var stackView = UIStackView()
+    private var notePreview = UILabel()
+    private var addNoteButton = UIButton()
+    private let noteStore: NoteUserDefaultsProtocol
     
-    let defaults = UserDefaults.standard
+    init(noteStore: NoteUserDefaults = NoteUserDefaults()) {
+        self.noteStore = noteStore
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "Note App"
         self.view.backgroundColor = .systemBackground
+        title = "Note App"
+        setupUI()
+    }
+    
+    private func setupUI() {
         configureStackView()
-        addNotePreviewLabelToStackView()
-        addButtonToStackView()
+        configureNotePreviewLabel()
+        configureEditNoteButton()
         setStackViewConstraints()
     }
 
     func configureStackView() {
         stackView.axis = .vertical
         stackView.distribution = .fill
-        stackView.spacing = 0
         view.addSubview(stackView)
     }
     
-    func addNotePreviewLabelToStackView() {
-        loadNotePreviewFromUserDefaults()
+    func configureNotePreviewLabel() {
+        notePreview.text = noteStore.loadNote()
         notePreview.numberOfLines = 0
         notePreview.adjustsFontSizeToFitWidth = true
         notePreview.textAlignment = .center
         stackView.addArrangedSubview(notePreview)
     }
     
-    func addButtonToStackView() {
+    func configureEditNoteButton() {
         addNoteButton = UIButton(type: .system)
         addNoteButton.setTitle("Edit note", for: .normal)
         addNoteButton.backgroundColor = .systemBlue
         addNoteButton.setTitleColor(.white, for: .normal)
         addNoteButton.layer.cornerRadius = 8
-        addNoteButton.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
-        
+        addNoteButton.addTarget(self, action: #selector(didTapEditNoteButton), for: .touchUpInside)
         stackView.addArrangedSubview(addNoteButton)
     }
     
-    @objc func buttonTapped() {
-        let appDelegate = UIApplication.shared.delegate as! AppDelegate
-        if let flutterVC = appDelegate.flutterViewController {
-            present(flutterVC, animated: true, completion: nil)
-        }
+    @objc func didTapEditNoteButton() {
+        guard let flutterVC = FlutterNoteManager.shared.flutterViewController else { return }
+        present(flutterVC, animated: true, completion: nil)
     }
     
     func setStackViewConstraints() {
@@ -67,26 +75,15 @@ class ViewController: UIViewController, NoteReceiverDelegate {
         stackView.spacing = 16
     }
     
-    func setDummyNoteIfFirstLaunch() {
-        let hasLaunchedBefore = defaults.bool(forKey: "hasLaunchedBefore")
-        if !hasLaunchedBefore {
-            let dummyNote = Note(content: "What's on your mind?")
-            defaults.set(dummyNote, forKey: "userNote")
-            defaults.set(true, forKey: "hasLaunchedBefore")
-        }
-    }
-    
-    func loadNotePreviewFromUserDefaults() {
-        let note = defaults.string(forKey: "userNote") ?? "What's on your mind?"
-        notePreview.text = note
-    }
-    
     func didReceiveNote(_ note: String) {
         DispatchQueue.main.async {
-            self.notePreview.text = note
-            self.defaults.set(note, forKey: "userNote")
-            self.defaults.set(true, forKey: "hasLaunchedBefore")
+            self.updateNotePreview(with: note)
         }
+    }
+    
+    private func updateNotePreview(with note: String) {
+        notePreview.text = note
+        noteStore.save(note: note)
     }
 }
 
