@@ -19,6 +19,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, FlutterAppLifeCycleProvid
     private let channelName = "natasharadika.flutter.dev/note"
     let flutterEngine = FlutterEngine(name: "my flutter engine")
     weak var delegate: NoteReceiverDelegate?
+    var flutterViewController: FlutterViewController?
     
     func add(_ delegate: any FlutterApplicationLifeCycleDelegate) {
         lifecycleDelegate.add(delegate)
@@ -26,6 +27,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, FlutterAppLifeCycleProvid
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         flutterEngine.run()
+        flutterViewController = FlutterViewController(engine: flutterEngine, nibName: nil, bundle: nil)
         let channel = FlutterMethodChannel(name: channelName, binaryMessenger: flutterEngine.binaryMessenger)
         
         // act on flutter who call method on ios
@@ -94,7 +96,5 @@ class AppDelegate: UIResponder, UIApplicationDelegate, FlutterAppLifeCycleProvid
         // If any sessions were discarded while the application was not running, this will be called shortly after application:didFinishLaunchingWithOptions.
         // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
     }
-    
-    
 }
 

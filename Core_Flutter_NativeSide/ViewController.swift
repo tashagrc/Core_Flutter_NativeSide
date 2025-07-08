@@ -53,9 +53,10 @@ class ViewController: UIViewController, NoteReceiverDelegate {
     }
     
     @objc func buttonTapped() {
-        let flutterEngine = (UIApplication.shared.delegate as! AppDelegate).flutterEngine
-        let flutterViewController = FlutterViewController(engine: flutterEngine, nibName: nil, bundle: nil)
-        present(flutterViewController, animated: true, completion: nil)
+        let appDelegate = UIApplication.shared.delegate as! AppDelegate
+        if let flutterVC = appDelegate.flutterViewController {
+            present(flutterVC, animated: true, completion: nil)
+        }
     }
     
     func setStackViewConstraints() {
