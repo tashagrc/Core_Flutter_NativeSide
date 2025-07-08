@@ -66,7 +66,6 @@ class ViewController: UIViewController, NoteReceiverDelegate {
         stackView.spacing = 16
     }
     
-    // will delete later
     func setDummyNoteIfFirstLaunch() {
         let hasLaunchedBefore = defaults.bool(forKey: "hasLaunchedBefore")
         if !hasLaunchedBefore {
